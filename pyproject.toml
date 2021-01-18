@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "alike"
+version = "0.1.0"
+description = "Loose object comparison for python"
+authors = ["Davis Kirkendall <davis.e.kirkendall@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+black = "^20.8b1"
+pytest = "^6.2.1"
+isort = "^5.7.0"
+flake8 = "^3.8.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
