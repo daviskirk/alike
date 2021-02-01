@@ -246,8 +246,8 @@ class IsLike:
 
     """
 
-    def __init__(self, errors: List[ErrorTuple]) -> None:
-        self.errors = errors
+    def __init__(self, errors: Sequence[ErrorTuple] = ()) -> None:
+        self.errors = list(errors)
 
     def __bool__(self):
         return not bool(self.errors)
@@ -281,38 +281,64 @@ class UnlikeError(AssertionError):
         )
 
 
+class ComparisonComplete(Exception):
+    """Raised when comparison is complete."""
+
+
 class Alike:
-    def __init__(self, schema: Union[Mapping, Any]) -> None:
+    def __init__(self, schema: Union[Mapping[Union[str, int], Any], Any]) -> None:
         self.schema = schema
-
-    def is_alike(self, obj: Any) -> IsLike:
-        errors = []
-        schema = self.schema
-
-        if isinstance(schema, List):
-            if not isinstance(obj, Sequence) or isinstance(obj, str):
-                return IsLike(
-                    [ErrorTuple([], obj, "Compared object is not a sequence")]
-                )
-            # convert compared to dictionary for better comparison
-            obj = {i: item for i, item in enumerate(obj)}
-            schema = {i: item for i, item in enumerate(schema)}
-        elif not isinstance(schema, Mapping):
-            if schema == obj:
-                return IsLike([])
-            else:
-                return IsLike([ErrorTuple([], obj, "Compared object is not equal")])
-
-        for key, expected in schema.items():
-            actual = _get(obj, key, MISSING)
-            op = expected if isinstance(expected, Op) else (A == expected)
-            if op(actual) is True:
-                continue
-            errors.append(ErrorTuple([key], actual, op.to_str(actual)))
-        return IsLike(errors)
+        self.last_result: IsLike = IsLike()
 
     def __eq__(self, obj: Any):
         return self.is_alike(obj)
+
+    def is_alike(self, obj: Any) -> IsLike:
+        errors = self._is_alike(self.schema, obj)
+        self.last_result = IsLike(errors)
+        return IsLike(errors)
+
+    def raise_on_error(self) -> None:
+        self.last_result.raise_on_error()
+
+    @classmethod
+    def _is_alike(
+        cls, schema: Union[Mapping, Any], obj: Any, path: Sequence[Union[str, int]] = ()
+    ) -> List[ErrorTuple]:
+        errors = []
+        path = list(path)
+
+        if isinstance(schema, Mapping):
+            # we don't need to modify preprocess mappings
+            pass
+        elif isinstance(schema, List):
+            # we can handle lists but we need to ensure that the compared
+            # object is a sequence to be able to compare them
+            if not isinstance(obj, Sequence) or isinstance(obj, str):
+                errors.append(
+                    ErrorTuple(path, obj, "Compared object is not a sequence")
+                )
+                return errors
+            # convert compared to dictionary for better comparison
+            obj = {i: item for i, item in enumerate(obj)}
+            schema = {i: item for i, item in enumerate(schema)}
+        else:
+            if schema != obj:
+                errors.append(ErrorTuple(path, obj, "Compared object is not equal"))
+            return errors
+
+        for key, expected in schema.items():
+            actual = _get(obj, key, MISSING)
+            if isinstance(expected, (dict, list)):
+                # we recursively parse errors if there are nested dictionaries/lists
+                errors.extend(cls._is_alike(expected, actual, path=path + [key]))
+                continue
+            op = expected if isinstance(expected, Op) else (A == expected)
+            if op(actual) is True:
+                continue
+            errors.append(ErrorTuple(path + [key], actual, op.to_str(actual)))
+
+        return errors
 
 
 def _get(obj: Any, key: Any, default=None, relax: bool = True) -> Any:

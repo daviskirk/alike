@@ -119,6 +119,48 @@ def raises(errors):
             [([], 6, "Compared object is not a sequence")],
             id="list comparison type error",
         ),
+        param(
+            {"test": 1, "nested": {"test2": 2}},
+            {"test": 1, "nested": {"test2": 2}},
+            [],
+            id="nested dict schema",
+        ),
+        param(
+            {"test": 1, "nested": {"test2": 2}},
+            {"test": 1, "nested": {"test2": A == 2}},
+            [],
+            id="nested dict schema using A",
+        ),
+        param(
+            {"test": 1, "nested": {"test2": 2}},
+            {"test": 1, "nested": {"test2": A == 3}},
+            [(["nested", "test2"], 2, "2 == 3")],
+            id="nested dict schema error",
+        ),
+        param(
+            {
+                "top": "ok",
+                "test": 1,
+                "before": "ok",
+                "nested": {"test2": 2},
+                "after": "ok",
+                "after_broken": "boom!",
+            },
+            {
+                "top": "ok",
+                "test": A == 2,
+                "before": "ok",
+                "nested": {"test2": A == 1},
+                "after": "ok",
+                "after_broken": "yeah!",
+            },
+            [
+                (["test"], 1, "1 == 2"),
+                (["nested", "test2"], 2, "2 == 1"),
+                (["after_broken"], "boom!", "'boom!' == 'yeah!'"),
+            ],
+            id="nested dict schema error on multiple levels",
+        ),
     ],
 )
 def test_alike(actual, compared, errors):
