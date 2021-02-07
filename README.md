@@ -1,3 +1,11 @@
+![Build Status](https://img.shields.io/github/workflow/status/daviskirk/alike/CI?style=flat-square)
+![Coverage Status](https://img.shields.io/codecov/c/github/daviskirk/alike/master?style=flat-square)
+![PyPI version](https://img.shields.io/pypi/v/alike?style=flat-square)
+![PyPI license](https://img.shields.io/pypi/l/alike?style=flat-square)
+![PyPI pyversions](https://img.shields.io/pypi/pyversions/alike?style=flat-square)
+![Code Style Black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)
+
+
 # ALIKE
 
 **ALIKE** helps you test/validate your objects and datasctructures.
