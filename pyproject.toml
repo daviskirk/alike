@@ -4,6 +4,26 @@ version = "0.1.0"
 description = "Loose object comparison for python"
 authors = ["Davis Kirkendall <davis.e.kirkendall@gmail.com>"]
 license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/daviskirk/alike"
+repository = "https://github.com/daviskirk/alike"
+documentation = "https://github.com/daviskirk/alike"
+keywords = ["schema", "compare", "validate", "pytest"]
+classifiers = [
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Topic :: Utilities",
+        "Topic :: Software Development :: Libraries",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -16,6 +36,9 @@ flake8 = "^3.8.4"
 mypy = "^0.790"
 coverage = "^5.3.1"
 click = "^7.1.2"
+
+[tool.poetry.plugins."pytest11"]
+pytest_alike = "alike.pytest_plugin"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -30,12 +53,11 @@ use_parentheses=true
 
 [tool.pytest.ini_options]
 junit_family="xunit2"
-addopts = "--doctest-modules"
+addopts = "--doctest-modules --doctest-glob README.md"
 
 [tool.coverage.run]
 branch = true
 source = ["src"]
-
 
 [tool.coverage.report]
 show_missing = true
